@@ -13,7 +13,7 @@ if(UNIX)
     find_package(SDL2 CONFIG REQUIRED)
 endif(UNIX)
 
-file(COPY ${CMAKE_SOURCE_DIR}/include/olcfont_consolas.bmp
+file(COPY ${CMAKE_SOURCE_DIR}/resource
             DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(GLOB_RECURSE all_source_file ${CMAKE_SOURCE_DIR}/src/*.c  ${CMAKE_SOURCE_DIR}/src/*.cpp )

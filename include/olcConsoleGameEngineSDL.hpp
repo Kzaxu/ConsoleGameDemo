@@ -743,7 +743,7 @@ private:
 		m_screen = SDL_CreateTexture(m_render, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, m_nScreenWidth * m_nFontWidth, m_nScreenHeight * m_nFontHeight);
 
 		// Load Font File
-		LoadFontFile("./olcfont_consolas.bmp");
+		LoadFontFile("./resource/olcfont_consolas.bmp");
 
 		// Create user resources as part of this thread
 		if (!OnUserCreate())
