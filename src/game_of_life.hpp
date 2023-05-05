@@ -123,4 +123,10 @@ private:
     }
 };
 
+void TestGameOfLife() {
+	GameOfLife game(GameOfLife::InitMethod::GosperGliderGun);
+	game.ConstructConsole(200, 150, 4, 4);
+	game.Start();
+}
+
 #endif
