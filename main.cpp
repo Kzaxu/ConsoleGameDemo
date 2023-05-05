@@ -1,10 +1,11 @@
-#include "mazes.hpp"
+#include "game_of_life.hpp"
 
 
 int SDL_main(int, char*[])
 {
 	// Use olcConsoleGameEngine derived app
-	MyGameMazes mazes(40, 20, 3);
-	mazes.Start();
+	GameOfLife game(GameOfLife::InitMethod::GosperGliderGun);
+	game.ConstructConsole(200, 150, 4, 4);
+	game.Start();
 	return 0;
 }
