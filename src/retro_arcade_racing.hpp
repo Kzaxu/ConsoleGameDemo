@@ -49,7 +49,8 @@ private:
 
     static constexpr float car_rel_y = 0.83f;
     static constexpr float car_perspect = (car_rel_y - 0.5f) / 0.5f;
-    
+
+
     void InitPaths() {
         std::vector<std::pair<float, float>> paths {
             {0.f, 200.f},{1.f, 100.f},{0.f, 200.f},
@@ -71,7 +72,6 @@ private:
             cur_speed -= 1.0f * fElapsedTime;
         } 
         
-        if ()
 
         cur_speed = std::min( std::max(0.f, cur_speed), max_speed);
 
@@ -140,27 +140,29 @@ private:
 
     void DrawBackground() {
         
-        for (int i = 0; i < ScreenWidth(); ++i) {
-            for (int j = 0; j < ScreenHeight() / 2; ++j) {
+        for (int j = 0; j < ScreenHeight() / 2; ++j) {
 
-                int y = ScreenHeight() / 2 + j;
-                float perspect = j * 2.0f/ ScreenHeight();
-                int track_mid = (0.5f + track_curvature * powf(1 - perspect, 3)) * ScreenWidth();
-                float track_mid_dist = fabs(track_mid - i);
+            int y = ScreenHeight() / 2 + j;
+            float perspect = j * 2.0f/ ScreenHeight();
+            int l_mid_len = (0.5f + track_curvature * powf(1 - perspect, 3)) * ScreenWidth();
+            int r_mid_len = ScreenWidth() - l_mid_len;
+            float road_width = min_road_width + (max_road_width - min_road_width) * perspect;
+            float clip_width = rel_clip_width * road_width;
 
-                float road_width = min_road_width + (max_road_width - min_road_width) * perspect;
-                float clip_width = rel_clip_width * road_width;
+            COLOUR clip_cor = sinf(80.0f *  powf(1.0f - perspect, 2) + distance) > 0.0f ? FG_RED : FG_WHITE;
+            COLOUR grass_cor = sinf(20.0f *  powf(1.0f - perspect, 2) + distance) > 0.0f ? FG_GREEN : FG_DARK_GREEN;
 
-                COLOUR clip_cor = sinf(80.0f *  powf(1.0f - perspect, 2) + distance) > 0.0f ? FG_RED : FG_WHITE;
-                COLOUR grass_cor = sinf(20.0f *  powf(1.0f - perspect, 2) + distance) > 0.0f ? FG_GREEN : FG_DARK_GREEN;
+            for (int i = 0; i < ScreenWidth(); ++i) {
 
-                if (track_mid_dist <  road_width * track_mid) {
-                    Draw(i, y, PIXEL_SOLID, FG_GREY);
-                }
-                else if (track_mid_dist < (road_width + clip_width) * track_mid) {
+                if (i <= (1 - road_width - clip_width) * l_mid_len) {
+                    Draw(i, y, PIXEL_SOLID, grass_cor);
+                } else if (i <= (1 - road_width) * l_mid_len) {
                     Draw(i, y, PIXEL_SOLID, clip_cor);
-                }
-                else {
+                } else if ( i <= l_mid_len + road_width * r_mid_len ) {
+                    Draw(i, y, PIXEL_SOLID, FG_GREY);
+                } else if (i <= l_mid_len + (road_width + clip_width) * r_mid_len) {
+                    Draw(i, y, PIXEL_SOLID, clip_cor);
+                } else {
                     Draw(i, y, PIXEL_SOLID, grass_cor);
                 }
             }
