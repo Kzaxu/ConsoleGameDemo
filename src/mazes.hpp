@@ -102,8 +102,8 @@ private:
              PIXEL_SOLID, FG_GREEN);
     }
 
-    std::vector<std::pair<int, int>> 
-    GetNeighbors(int x, int y) {
+    
+    auto GetNeighbors(int x, int y) {
         std::vector<std::pair<int, int>> res;
         constexpr int directs[4][2] = {
             {-1, 0}, {1, 0}, {0, -1}, {0, 1}

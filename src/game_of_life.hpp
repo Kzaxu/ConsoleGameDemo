@@ -16,6 +16,10 @@ public:
         m_sAppName = L"Game Of Life";
     }
 
+    GameOfLife(int* m) : m_output(m) {
+        m_sAppName = L"Game Of Life";
+    }
+
 protected:
     bool OnUserCreate() override {
         m_state = new int[ScreenHeight() * ScreenWidth()]();

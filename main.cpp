@@ -1,9 +1,9 @@
-#include "game_of_life.hpp"
+#include "retro_arcade_racing.hpp"
 
 
 int SDL_main(int, char*[])
 {
 	// Use olcConsoleGameEngine derived app
-	TestGameOfLife();
+	TestRetroArcadeRacing();
 	return 0;
 }
