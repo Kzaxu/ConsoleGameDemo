@@ -1,9 +1,9 @@
-#include "retro_arcade_racing.hpp"
+#include "splines_video.hpp"
 
 
 int SDL_main(int, char*[])
 {
 	// Use olcConsoleGameEngine derived app
-	TestRetroArcadeRacing();
+	TestSplineVideo();
 	return 0;
 }
