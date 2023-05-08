@@ -1,9 +1,9 @@
-#include "splines_video.hpp"
+#include "frogger.hpp"
 
 
 int SDL_main(int, char*[])
 {
 	// Use olcConsoleGameEngine derived app
-	TestSplineVideo();
+	TestFrogger();
 	return 0;
 }
