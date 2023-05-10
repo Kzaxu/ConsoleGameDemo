@@ -7,19 +7,45 @@ class Frogger : public olcConsoleGameEngine {
 
 public:
     Frogger(int fontw, int fonth) {
+
         m_sAppName = L"Frogger";
-        cell_num_y = lanes.size();
+        
         lanes_pos = std::vector<float>(10);
+
+        cell_num_y = lanes.size();
+        init_frog_cell_y = cell_num_y - 1;
+
+        ResetFrog();
+
         ConstructConsole(cell_num_x * cell_size, 
                         cell_num_y * cell_size, fontw, fonth);
     }
 
 protected:
     bool OnUserCreate() override {
+        spriteBus = new olcSprite(L"resource/frogger/bus.spr");
+		spriteLog = new olcSprite(L"resource/frogger/log.spr");
+		spriteWater = new olcSprite(L"resource/frogger/water.spr");
+		spriteFrog = new olcSprite(L"resource/frogger/frog.spr");
+		spritePavement = new olcSprite(L"resource/frogger/pavement.spr");
+		spriteWall = new olcSprite(L"resource/frogger/wall.spr");
+		spriteHome = new olcSprite(L"resource/frogger/home.spr");
+		spriteCar1 = new olcSprite(L"resource/frogger/car1.spr");
+		spriteCar2 = new olcSprite(L"resource/frogger/car2.spr");
+
         return true;
     }
 
     bool OnUserDestroy() override {
+        delete spriteBus ;
+        delete spriteLog ;
+        delete spriteWater ;
+        delete spriteFrog ;
+        delete spritePavement;
+        delete spriteWall ;
+        delete spriteHome ;
+        delete spriteCar1 ;
+        delete spriteCar2 ;
         return true;
     }
 
@@ -29,6 +55,7 @@ protected:
         UpdateStatus(fElapsedTime);
         Fill(0, 0, ScreenWidth(), ScreenHeight(), L' ');
         DrawLanes();
+        DrawFrog();
         return true;
     }
 
@@ -57,11 +84,19 @@ private:
     };
     std::vector<float> lanes_pos;
 
-    constexpr static int cell_size = 10;
+    constexpr static int cell_size = 8;
     constexpr static int cell_num_x = 16;
+    constexpr static int init_frog_cell_x = 7;
+    
+    std::wstring security_string = L".jklph";
+
     int cell_num_y;
+    int init_frog_cell_y;
+    float frogger_cell_x;
+    float frogger_cell_y;
 
     void UpdateStatus(float fElapsedTime) {
+
         for (int i = 0; i < lanes_pos.size(); ++i) {
             lanes_pos[i] += lanes[i].first * fElapsedTime;
             if (lanes_pos[i] >= 64)
@@ -69,6 +104,50 @@ private:
             else if (lanes_pos[i] < 0)
                 lanes_pos[i] += 64;
         }
+        UpdateFrogStatus(fElapsedTime);
+
+    }
+
+    void UpdateFrogStatus(float fElapsedTime) {
+        if (m_keys[VK_UP].bReleased) {
+            frogger_cell_y -= 1;
+        }
+        if (m_keys[VK_DOWN].bReleased) {
+            frogger_cell_y += 1;
+        }
+        if (m_keys[VK_LEFT].bReleased) {
+            frogger_cell_x -= 1;
+        }
+        if (m_keys[VK_RIGHT].bReleased) {
+            frogger_cell_x += 1;
+        }
+
+        frogger_cell_x = std::min(cell_num_x - 1.f, std::max(0.f, frogger_cell_x));
+        frogger_cell_y = std::min(cell_num_y - 1.f, std::max(0.f, frogger_cell_y));
+
+        if (FrogInDanger()) {
+            ResetFrog();
+        }
+
+        int cell_y = frogger_cell_y;
+        if (cell_y >= 1 && cell_y <= 3) {
+            frogger_cell_x -= lanes[cell_y].first * fElapsedTime;
+        }
+        frogger_cell_x = std::min(cell_num_x - 1.f, std::max(0.f, frogger_cell_x));
+    }
+
+    bool FrogInDanger() {
+        int l_char_ind = ((int)(frogger_cell_x + lanes_pos[frogger_cell_y])) % 64;
+        int r_char_ind = ((int)(frogger_cell_x + 1 + lanes_pos[frogger_cell_y])) % 64;
+        wchar_t l_char = lanes[frogger_cell_y].second[l_char_ind];
+        wchar_t r_char = lanes[frogger_cell_y].second[r_char_ind];
+        return security_string.find(l_char) == std::wstring::npos ||
+                security_string.find(r_char) == std::wstring::npos;
+    }
+
+    void ResetFrog() {
+        frogger_cell_x = init_frog_cell_x;
+        frogger_cell_y = init_frog_cell_y;
     }
 
     void DrawLanes() {
@@ -81,35 +160,40 @@ private:
             int y_lower = y_upper + cell_size;
 
             for (int i = 0; i <= cell_num_x; ++i) {
-                Fill(i * cell_size - remain, y_upper, (i + 1) * cell_size - remain, y_lower, 
-                        lanes[j].second[(char_ind + i) % 64]);
+                DrawGraphicChar(i * cell_size - remain, y_upper, lanes[j].second[(char_ind + i) % 64]);
             }
         }
+    }
+
+    void DrawFrog() {
+        int x = frogger_cell_x * cell_size;
+        int y = frogger_cell_y * cell_size;
+        DrawSprite(x, y, spriteFrog);
     }
 
     void DrawGraphicChar(int x, int y, wchar_t g_char) {
         switch (g_char) // Graphics always make code verbose and less clear
         {					
-            case L'a':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteBus, 0, 0, 8, 8);		break; // Bus 1
-            case L's':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteBus, 8, 0, 8, 8);		break; // Bus 2
-            case L'd':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteBus, 16, 0, 8, 8);	break; // Bus 3
-            case L'f':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteBus, 24, 0, 8, 8);	break; // Bus 4
+            case L'a':	DrawPartialSprite(x, y, spriteBus, 0, 0, 8, 8);		break; // Bus 1
+            case L's':	DrawPartialSprite(x, y, spriteBus, 8, 0, 8, 8);		break; // Bus 2
+            case L'd':	DrawPartialSprite(x, y, spriteBus, 16, 0, 8, 8);	break; // Bus 3
+            case L'f':	DrawPartialSprite(x, y, spriteBus, 24, 0, 8, 8);	break; // Bus 4
 
-            case L'j':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteLog, 0, 0, 8, 8);		break; // Log Start
-            case L'l':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteLog, 8, 0, 8, 8);		break; // Log Middle
-            case L'k':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteLog, 16, 0, 8, 8);	break; // Log End
+            case L'j':	DrawPartialSprite(x, y, spriteLog, 0, 0, 8, 8);		break; // Log Start
+            case L'l':	DrawPartialSprite(x, y, spriteLog, 8, 0, 8, 8);		break; // Log Middle
+            case L'k':	DrawPartialSprite(x, y, spriteLog, 16, 0, 8, 8);	break; // Log End
                                     
-            case L'z': 	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteCar1, 0, 0, 8, 8);	break; // Car1 Back
-            case L'x':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteCar1, 8, 0, 8, 8);	break; // Car1 Front
+            case L'z': 	DrawPartialSprite(x, y, spriteCar1, 0, 0, 8, 8);	break; // Car1 Back
+            case L'x':	DrawPartialSprite(x, y, spriteCar1, 8, 0, 8, 8);	break; // Car1 Front
 
-            case L't': 	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteCar2, 0, 0, 8, 8);	break; // Car2 Back
-            case L'y': 	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteCar2, 8, 0, 8, 8);	break; // Car2 Front
+            case L't': 	DrawPartialSprite(x, y, spriteCar2, 0, 0, 8, 8);	break; // Car2 Back
+            case L'y': 	DrawPartialSprite(x, y, spriteCar2, 8, 0, 8, 8);	break; // Car2 Front
 
-            case L'w': 	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteWall, 0, 0, 8, 8);	break; // Wall
-            case L'h':	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteHome, 0, 0, 8, 8);	break; // Home
-            case L',': 	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spriteWater, 0, 0, 8, 8);	break; // Water
-            case L'p': 	DrawPartialSprite((x + i)*nCellSize - nCellOffset, y*nCellSize, spritePavement, 0, 0, 8, 8); break; // Pavement
-            case L'.': 	Fill((x + i)*nCellSize - nCellOffset, y*nCellSize, (x + i + 1)*nCellSize - nCellOffset, (y + 1)*nCellSize, L' ');	break; // Road
+            case L'w': 	DrawPartialSprite(x, y, spriteWall, 0, 0, 8, 8);	break; // Wall
+            case L'h':	DrawPartialSprite(x, y, spriteHome, 0, 0, 8, 8);	break; // Home
+            case L',': 	DrawPartialSprite(x, y, spriteWater, 0, 0, 8, 8);	break; // Water
+            case L'p': 	DrawPartialSprite(x, y, spritePavement, 0, 0, 8, 8); break; // Pavement
+            case L'.': 	Fill(x ,y, x + cell_size, y + cell_size, L' ');	break; // Road
         }
     }
 };
