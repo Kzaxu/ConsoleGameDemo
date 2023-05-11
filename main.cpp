@@ -1,9 +1,9 @@
-#include "frogger.hpp"
+#include "a_star.hpp"
 
 
 int SDL_main(int, char*[])
 {
 	// Use olcConsoleGameEngine derived app
-	TestFrogger();
+	TestAStarGame();
 	return 0;
 }
